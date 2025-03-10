@@ -1,93 +1,110 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Layout from "../components/Layouts/Layout";
 import MemeCard from "../components/MemeCard";
-import { fetchMemes } from "../store/store"; 
-import { debounce } from "lodash"; // For debounced search
+import { fetchMemes } from "../store/store"; // Fetch API memes
 
 const Explore = () => {
     const dispatch = useDispatch();
-    const memes = useSelector((state) => state.app.memes);
-    const interactions = useSelector((state) => state.app.interactions);
-    const theme = useSelector((state) => state.app.theme); // Get theme from Redux
 
-    // State for filters
+    // Ensure `memes` and `interactions` are always defined
+    const memes = useSelector((state) => state.app.memes) || [];
+    const interactions = useSelector((state) => state.app.interactions) || {};
+    const theme = useSelector((state) => state.app.theme) || "light";
+
     const [category, setCategory] = useState("Trending");
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("likes");
 
-    // Debounced search function
-    const debouncedSearch = useCallback(
-        debounce((query) => {
-            dispatch(fetchMemes(query)); // API call with search term
-        }, 500), // 500ms delay
-        [dispatch]
-    );
-
     useEffect(() => {
-        dispatch(fetchMemes()); // Fetch memes on mount
+        dispatch(fetchMemes()); // Fetch all memes on mount
     }, [dispatch]);
 
-    // Handle search input change
-    const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
-        debouncedSearch(e.target.value); // Call debounced function
+    // Function to get like count
+    const getLikeCount = (memeId) => interactions[memeId]?.likes || 0;
+
+    // Function to get comment count
+    const getCommentCount = (meme) => {
+        if (Array.isArray(meme.comments)) return meme.comments.length;
+        if (typeof meme.comments === "number") return meme.comments;
+        return interactions[meme.id]?.comments?.length || 0;
     };
 
-    // Function to get updated like count
-    const getLikeCount = (memeId) => {
-        return interactions[memeId]?.likes || 0;
+    // Function to filter memes based on category
+    const filterByCategory = (memes) => {
+        if (category === "Trending") {
+            return [...memes]
+                .sort((a, b) => getLikeCount(b.id) - getLikeCount(a.id))
+                .slice(0, 10); // Top 10 liked memes
+        }
+        if (category === "New") {
+            return [...memes].slice(-10); // Last 10 fetched memes (assuming API returns in order)
+        }
+        if (category === "Classic") {
+            return memes.filter((meme) => meme.box_count >= 3); // More text boxes = classic meme format
+        }
+        if (category === "Random") {
+            return [...memes].sort(() => Math.random() - 0.5).slice(0, 10); // Shuffle and take 10 random memes
+        }
+        return memes;
     };
 
-    // Sort memes dynamically
-    const sortedMemes = [...memes].sort((a, b) => {
+    // Apply search filter first (ensure meme.name is defined)
+    const searchedMemes = memes.filter((meme) =>
+        meme.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    // Apply category filtering
+    const categorizedMemes = filterByCategory(searchedMemes);
+
+    // Sort filtered memes
+    const sortedMemes = [...categorizedMemes].sort((a, b) => {
         if (sortBy === "likes") return getLikeCount(b.id) - getLikeCount(a.id);
         if (sortBy === "date") return new Date(b.date) - new Date(a.date);
-        if (sortBy === "comments") return (b.comments?.length || 0) - (a.comments?.length || 0);
+        if (sortBy === "comments") return getCommentCount(b) - getCommentCount(a);
         return 0;
     });
 
     return (
-        <div className={`p-6 min-h-screen ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
+        <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
             <Layout>
-                <h1 className="text-3xl font-bold text-center mb-6">Explore Memes</h1>
+                <h1 className="text-4xl mt-6 font-extrabold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-500">
+                    Explore Memes
+                </h1>
 
-                {/* Filter & Search Controls */}
-                <div className="flex flex-wrap justify-center gap-4 mb-6">
+                {/* Search and Filters */}
+                <div className="flex flex-wrap justify-center gap-6 mb-8 px-4">
                     <input
                         type="text"
                         placeholder="Search memes..."
                         value={searchTerm}
-                        onChange={handleSearchChange}
-                        className={`px-4 py-2 border rounded-md w-64 ${
-                            theme === "dark" ? "bg-gray-800 text-white border-gray-600" : "bg-gray-200 text-black"
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className={`px-6 py-3 rounded-xl shadow-md focus:outline-none w-64 ${
+                            theme === "dark" ? "bg-gray-800 text-white border-gray-600" : "bg-gray-200 text-black border-gray-300"
                         }`}
                     />
-                    {/* Category Filter */}
+                    {/* Category Buttons */}
                     {["Trending", "New", "Classic", "Random"].map((cat) => (
                         <button
                             key={cat}
                             onClick={() => setCategory(cat)}
-                            className={`px-4 py-2 rounded-md transition-all ${
-                                category === cat 
-                                    ? theme === "dark" 
-                                        ? "bg-blue-500 text-white" 
-                                        : "bg-blue-600 text-white"
-                                    : theme === "dark" 
-                                        ? "bg-gray-700 text-white" 
-                                        : "bg-gray-200 text-black"
+                            className={`px-6 py-3 rounded-xl text-lg duration-300 hover:bg-gradient-to-r from-blue-500 to-cyan-500 hover:text-white font-medium transition-all ease-in-out ${
+                                category === cat
+                                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white opacity-80"
+                                    : theme === "dark"
+                                    ? "bg-gray-700 text-white"
+                                    : "bg-gray-300 text-black"
                             }`}
                         >
                             {cat}
                         </button>
                     ))}
-
                     {/* Sorting Dropdown */}
                     <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
-                        className={`px-4 py-2 border rounded-md ${
-                            theme === "dark" ? "bg-gray-800 text-white border-gray-600" : "bg-white text-black"
+                        className={`px-6 py-3 rounded-xl border shadow-md focus:outline-none ${
+                            theme === "dark" ? "bg-gray-800 text-white border-gray-600" : "bg-white text-black border-gray-300"
                         }`}
                     >
                         <option value="likes">Sort by Likes</option>
@@ -97,11 +114,13 @@ const Explore = () => {
                 </div>
 
                 {/* Meme Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 px-4 py-6">
                     {sortedMemes.length > 0 ? (
-                        sortedMemes.map((meme) => <MemeCard key={meme.id} meme={meme} />)
+                        sortedMemes.map((meme, index) => (
+                            <MemeCard key={meme.id} meme={meme} ranking={index + 1} />
+                        ))
                     ) : (
-                        <p className="text-center text-xl">No memes found... 😢</p>
+                        <p className="text-center text-xl text-gray-500">No memes found... 😢</p>
                     )}
                 </div>
             </Layout>

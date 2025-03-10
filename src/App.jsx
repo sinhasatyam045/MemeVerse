@@ -1,4 +1,5 @@
-import React from 'react';
+// In your App.jsx, update to apply theme class to the entire document body
+import React, { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import LandingPage from './pages/LandingPage';
@@ -10,9 +11,22 @@ import MemeDetailsPage from './pages/MemeDetailsPage';
 
 const App = () => {
   const theme = useSelector((state) => state.app.theme);
+  
+  // Apply theme class to entire document body
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.body.classList.add('dark');
+      document.body.classList.add('bg-gray-900');
+      document.body.classList.add('text-white');
+    } else {
+      document.body.classList.remove('dark');
+      document.body.classList.remove('bg-gray-900');
+      document.body.classList.remove('text-white');
+    }
+  }, [theme]);
 
   return (
-    <div className={theme === 'dark' ? 'dark bg-gray-900 text-white' : 'bg-white text-black'}>
+    <div className="min-h-screen">
       <Routes>
         <Route path='/' element={<LandingPage />} />
         <Route path='/upload' element={<Upload />} />
