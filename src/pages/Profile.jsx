@@ -3,6 +3,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { updateUser, setLikedMemes } from "../store/store"; 
 import Layout from "../components/Layouts/Layout";
 import { FaUserCircle } from "react-icons/fa";
+import { Share2, X, Link as LinkIcon } from "lucide-react"; // Import Lucide icons
+import { FaWhatsapp, FaTwitter, FaFacebook, FaLinkedin } from "react-icons/fa"; // Import social icons
+import toast, { Toaster } from "react-hot-toast"; // Import toast for notifications
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -15,6 +18,8 @@ const Profile = () => {
   
   const [editMode, setEditMode] = useState(false);
   const [showLikedMemes, setShowLikedMemes] = useState(true);
+  // Add state for share sheet
+  const [showShareSheet, setShowShareSheet] = useState(false);
   
   // Create local form state
   const [formData, setFormData] = useState({
@@ -67,9 +72,40 @@ const Profile = () => {
     setEditMode(false);
   };
 
+  // Share functionality
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: `${user.name}'s Profile`,
+        text: `Check out ${user.name}'s profile!`,
+        url: window.location.href
+      }).catch(err => {
+        console.error('Error sharing:', err);
+        setShowShareSheet(true);
+      });
+    } else {
+      setShowShareSheet(true);
+    }
+  };
+
+  const closeShareSheet = () => setShowShareSheet(false);
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Profile link copied to clipboard! 📋");
+  };
+
+  const shareOptions = [
+    { name: "WhatsApp", url: `https://wa.me/?text=${encodeURIComponent(`Check out ${user.name}'s profile! ${window.location.href}`)}`, icon: <FaWhatsapp className="text-green-500" /> },
+    { name: "Twitter", url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out ${user.name}'s profile!`)}&url=${encodeURIComponent(window.location.href)}`, icon: <FaTwitter className="text-blue-400" /> },
+    { name: "Facebook", url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, icon: <FaFacebook className="text-blue-600" /> },
+    { name: "LinkedIn", url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`, icon: <FaLinkedin className="text-blue-500" /> },
+  ];
+
   return (
     <Layout>
       <div className="max-w-4xl m-4 mx-auto bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl space-y-8">
+        <Toaster /> {/* Add Toaster for notifications */}
         
         {/* Profile Header */}
         <div className="flex justify-center">
@@ -140,7 +176,7 @@ const Profile = () => {
           )}
         </div>
 
-        {/* Stats */}
+        
          {/* Stats */}
           <div className="mt-4 flex justify-around text-center">
             <div>
@@ -169,12 +205,16 @@ const Profile = () => {
           ) : (
             <button
               onClick={() => setEditMode(true)}
-              className="px-4 py-2 rounded-md border font-semibold border-gray-400 bg-gradient-to-r from-blue-500 to-cyan-500 transition duration-300 hover:bg-blue-600 hover:text-white"
+              className=" cursor-pointer px-4 py-2 rounded-md border font-semibold hover:scale-105 border-gray-400 bg-gradient-to-r from-blue-500 to-cyan-500 transition duration-300 hover:bg-blue-600 hover:text-white"
             >
               Edit Profile
             </button>
           )}
-          <button className="px-4 py-2 rounded-md border font-semibold border-gray-400 bg-gradient-to-r from-blue-500 to-cyan-500 transition duration-300 hover:bg-blue-600 hover:text-white">
+          <button 
+            onClick={handleShare}
+            className=" cursor-pointer px-4 py-2 rounded-md border font-semibold hover:scale-105 border-gray-400 bg-gradient-to-r from-blue-500 to-cyan-500 transition duration-300 hover:bg-blue-600 hover:text-white flex items-center gap-2"
+          >
+            <Share2 size={18} />
             Share Profile
           </button>
         </div>
@@ -189,7 +229,7 @@ const Profile = () => {
           <div className="mt-6 flex justify-center space-x-4">
             <button
               onClick={() => setShowLikedMemes(true)}
-              className={`px-4 py-2 rounded-md font-semibold ${
+              className={` cursor-pointer px-4 py-2 rounded-md hover:scale-105 font-semibold ${
                 showLikedMemes 
                   ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white" 
                   : "border border-gray-400 bg-gradient-to-r from-blue-500 to-cyan-500"
@@ -199,7 +239,7 @@ const Profile = () => {
             </button>
             <button
               onClick={() => setShowLikedMemes(false)}
-              className={`px-4 py-2 rounded-md font-semibold ${
+              className={` cursor-pointer px-4 py-2 rounded-md hover:scale-105 font-semibold ${
                 !showLikedMemes 
                   ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white" 
                   : "border border-gray-400 bg-gradient-to-r from-blue-500 to-cyan-500"
@@ -249,6 +289,35 @@ const Profile = () => {
           </div>
         </div>
 
+        {/* Share Profile Modal - Similar to MemeDetailsPage share sheet */}
+        {showShareSheet && (
+          <div className="fixed inset-0 flex justify-center items-end bg-black bg-opacity-50 z-50">
+            <div className="w-full max-w-md rounded-t-lg p-6 shadow-xl transition-all bg-white dark:bg-gray-800 dark:text-white">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Share Profile</h2>
+                <X className="cursor-pointer hover:text-red-500" size={24} onClick={closeShareSheet} />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mt-5">
+                {shareOptions.map((option) => (
+                  <a key={option.name} href={option.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition">
+                    {option.icon}
+                    <span>{option.name}</span>
+                  </a>
+                ))}
+              </div>
+
+              <button className="mt-5 w-full py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition flex items-center justify-center" onClick={copyLink}>
+                <LinkIcon className="mr-2" size={20} />
+                Copy Link
+              </button>
+
+              <button className="mt-3 w-full py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition" onClick={closeShareSheet}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

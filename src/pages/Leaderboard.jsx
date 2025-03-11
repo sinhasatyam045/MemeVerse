@@ -8,6 +8,7 @@ import { motion } from "framer-motion"; // Animations
 
 const Leaderboard = () => {
     const memes = useSelector((state) => state.app.memes);
+    const interactions = useSelector((state) => state.app.interactions);
     const { width, height } = useWindowSize();
 
     // Get theme from Redux
@@ -20,8 +21,17 @@ const Leaderboard = () => {
         return () => clearTimeout(timer);
     }, []);
 
+    // Function to get the likes count for a meme
+    const getLikesForMeme = (memeId) => {
+        return interactions[memeId]?.likes || 0;
+    };
+
     // Sort memes by likes in descending order
-    const sortedMemes = [...memes].sort((a, b) => b.likes - a.likes);
+    const sortedMemes = [...memes].sort((a, b) => {
+        const likesA = getLikesForMeme(a.id);
+        const likesB = getLikesForMeme(b.id);
+        return likesB - likesA;
+    });
 
     // Function to return the appropriate emoji for the rank
     const getRankEmoji = (rank) => {
@@ -59,28 +69,28 @@ const Leaderboard = () => {
 
                 {/* Category Tabs */}
                 <div className="flex justify-center mb-8">
-                <div className={`flex rounded-lg overflow-hidden ${theme === "dark" ? "bg-gray-800" : "bg-gray-200"} p-1`}>
-    <button
-        className={`px-6 py-3 font-bold rounded-lg transition-all duration-200 ${
-            activeTab === "memes"
-            ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white" 
-            : `${theme === "dark" ? "text-white" : "text-gray-800"} hover:bg-gradient-to-r hover:from-blue-500 hover:to-cyan-500 hover:text-white`
-        }`}
-        onClick={() => setActiveTab("memes")}
-    >
-        🔥 Top Memes
-    </button>
-    <button
-        className={`px-6 py-3 font-bold rounded-lg transition-all duration-200 ${
-            activeTab === "memers"
-            ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white" 
-            : `${theme === "dark" ? "text-white" : "text-gray-800"} hover:bg-gradient-to-r hover:from-blue-500 hover:to-cyan-500 hover:text-white`
-        }`}
-        onClick={() => setActiveTab("memers")}
-    >
-        👑 Top Memers
-    </button>
-</div>
+                    <div className={`flex rounded-lg overflow-hidden ${theme === "dark" ? "bg-gray-800" : "bg-gray-200"} p-1`}>
+                        <button
+                            className={`cursor-pointer px-6 py-3 font-bold rounded-lg transition-all hover:scale-105 duration-200 ${
+                                activeTab === "memes"
+                                ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white" 
+                                : `${theme === "dark" ? "text-white" : "text-gray-800"} hover:bg-gradient-to-r hover:from-blue-500 hover:to-cyan-500 hover:text-white`
+                            }`}
+                            onClick={() => setActiveTab("memes")}
+                        >
+                            🔥 Top Memes
+                        </button>
+                        <button
+                            className={`cursor-pointer px-6 py-3 font-bold rounded-lg transition-all hover:scale-105 duration-200 ${
+                                activeTab === "memers"
+                                ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white" 
+                                : `${theme === "dark" ? "text-white" : "text-gray-800"} hover:bg-gradient-to-r hover:from-blue-500 hover:to-cyan-500 hover:text-white`
+                            }`}
+                            onClick={() => setActiveTab("memers")}
+                        >
+                            👑 Top Memers
+                        </button>
+                    </div>
                 </div>
 
                 {/* Top Memes Section */}
@@ -119,6 +129,11 @@ const Leaderboard = () => {
                                     >
                                         {getRankEmoji(index + 1)} {/* Ranking emoji */}
                                     </motion.div>
+
+                                    {/* Likes Count Display */}
+                                    <div className="absolute -top-2 -right-2 bg-red-500 text-white font-bold px-3 py-1 rounded-full text-sm shadow-lg">
+                                        ❤️ {getLikesForMeme(meme.id)}
+                                    </div>
 
                                     {/* Meme Card */}
                                     <MemeCard meme={meme} />

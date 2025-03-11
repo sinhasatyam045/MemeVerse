@@ -58,7 +58,7 @@ const MemeDetailsPage = () => {
 
       {/* Left: Meme + Actions */}
       <div className="w-full md:w-1/2 flex flex-col items-center text-center">
-        <Link to="/explore" className="px-4 py-2 font-semibold rounded-md border border-gray-400   bg-gradient-to-r from-blue-500 to-cyan-500 transition duration-300 hover:bg-blue-600 hover:text-white">
+        <Link to="/explore" className="px-4 py-2 font-semibold rounded-md border hover:scale-105 border-gray-400   bg-gradient-to-r from-blue-500 to-cyan-500 transition duration-300 hover:bg-blue-600 hover:text-white">
           ← Explore Back
         </Link>
         <h1 className="text-4xl font-bold text-blue-600">{meme.title}</h1>
@@ -99,7 +99,7 @@ const MemeDetailsPage = () => {
             />
 
             <button
-              className="px-4 py-2 rounded-md border font-semibold border-gray-400   bg-gradient-to-r from-blue-500 to-cyan-500 transition duration-300 hover:bg-blue-600 hover:text-white"
+              className="cursor-pointer px-4 py-2 rounded-md border font-semibold hover:scale-105 border-gray-400   bg-gradient-to-r from-blue-500 to-cyan-500 transition duration-300 hover:bg-blue-600 hover:text-white"
               onClick={handleComment}
             >
               Post
@@ -117,7 +117,7 @@ const MemeDetailsPage = () => {
                   <p className="flex-1">{c}</p>
                   <button
                   onClick={() => handleDeleteComment(index)}
-                  className="px-4 py-2 rounded-md border font-semibold border-gray-400   bg-gradient-to-r from-red-400 to bg-red-600 transition duration-300 hover:bg-red-700 hover:text-white"
+                  className="cursor-pointer px-4 py-2 rounded-md border hover:scale-105 font-semibold border-gray-400   bg-gradient-to-r from-red-400 to bg-red-600 transition duration-300 hover:bg-red-700 hover:text-white"
                   >
                   🗑️ Delete
                   </button>

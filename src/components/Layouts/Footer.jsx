@@ -15,7 +15,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* About column */}
           <div>
-            <h3 className={`font-bold text-lg mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+            <h3 className={`font-bold text-lg mb-4 ${theme === 'dark' ? 'text-cyan-500' : 'text-cyan-500'}`}>
               About MemeVerse
             </h3>
             <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} mb-4`}>
@@ -30,7 +30,7 @@ const Footer = () => {
           
           {/* Quick links column */}
           <div>
-            <h3 className={`font-bold text-lg mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+            <h3 className={`font-bold text-lg mb-4 ${theme === 'dark' ? 'text-cyan-500' : 'text-cyan-500'}`}>
               Quick Links
             </h3>
             <ul className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} space-y-2`}>
@@ -54,7 +54,7 @@ const Footer = () => {
           
           {/* Contact column */}
           <div>
-            <h3 className={`font-bold text-lg mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+            <h3 className={`font-bold text-lg mb-4 ${theme === 'dark' ? 'text-cyan-500' : 'text-cyan-500'}`}>
               Get In Touch
             </h3>
             <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} mb-4`}>
@@ -115,12 +115,12 @@ const Footer = () => {
         {/* Bottom section with copyright */}
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0">
-            <p className={`text-center md:text-left ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-center md:text-left ${theme === 'dark' ? 'text-cyan-500' : 'text-cyan-500'}`}>
               © {currentYear} MemeVerse by Satyam. All rights reserved.
             </p>
           </div>
           
-          <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+          <div className={`text-sm ${theme === 'dark' ? 'text-cyan-500' : 'text-cyan-500'}`}>
             <span>Privacy Policy</span>
             <span className="mx-2">•</span>
             <span>Terms of Service</span>

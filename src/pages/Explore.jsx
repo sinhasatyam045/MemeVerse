@@ -80,7 +80,7 @@ const Explore = () => {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className={`px-6 py-3 rounded-xl shadow-md focus:outline-none w-64 ${
-                            theme === "dark" ? "bg-gray-800 text-white border-gray-600" : "bg-gray-200 text-black border-gray-300"
+                            theme === "dark" ? "bg-gray-800 text-white border-gray-600" : "bg-gray-200 text-black hover:scale-105 border-gray-300"
                         }`}
                     />
                     {/* Category Buttons */}
@@ -88,7 +88,7 @@ const Explore = () => {
                         <button
                             key={cat}
                             onClick={() => setCategory(cat)}
-                            className={`px-6 py-3 rounded-xl text-lg duration-300 hover:bg-gradient-to-r from-blue-500 to-cyan-500 hover:text-white font-medium transition-all ease-in-out ${
+                            className={`cursor-pointer px-6 py-3 rounded-xl text-lg hover:scale-105 duration-300 hover:bg-gradient-to-r from-blue-500 to-cyan-500 hover:text-white font-medium transition-all ease-in-out ${
                                 category === cat
                                     ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white opacity-80"
                                     : theme === "dark"
@@ -103,7 +103,7 @@ const Explore = () => {
                     <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
-                        className={`px-6 py-3 rounded-xl border shadow-md focus:outline-none ${
+                        className={`cursor-pointer px-6 py-3 rounded-xl border hover:scale-105 shadow-md focus:outline-none ${
                             theme === "dark" ? "bg-gray-800 text-white border-gray-600" : "bg-white text-black border-gray-300"
                         }`}
                     >

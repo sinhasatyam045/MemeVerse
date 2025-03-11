@@ -112,7 +112,7 @@ const Upload = () => {
             <div className="space-y-8">
               <button
                 onClick={handleUpload}
-                className="w-full py-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl text-white font-semibold text-xl shadow-lg hover:scale-105 transition-all"
+                className="cursor-pointer w-full py-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl text-white font-semibold text-xl shadow-lg hover:scale-105 transition-all"
               >
                 <span className='text-white'>☁️</span> Upload Image/GIF
               </button>
@@ -132,7 +132,7 @@ const Upload = () => {
                 <div className="relative mt-6">
                   <button
                     onClick={fetchAICaptions}
-                    className="w-full py-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg text-white hover:scale-105 transition-all"
+                    className="cursor-pointer w-full py-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg text-white hover:scale-105 transition-all"
                   >
                     🤖 Get AI Captions
                   </button>
@@ -165,7 +165,7 @@ const Upload = () => {
                       <button
                         key={pos.id}
                         onClick={() => setPosition(pos.id)}
-                        className={`p-4 rounded-lg text-2xl ${position === pos.id ? 'bg-gradient-to-r from-blue-500 to-cyan-500' : 'bg-gray-300 dark:bg-gray-600'} transition-all`}
+                        className={`cursor-pointer p-4 rounded-lg text-2xl ${position === pos.id ? 'bg-gradient-to-r from-blue-500 to-cyan-500' : 'bg-gray-300 dark:bg-gray-600'} transition-all`}
                       >
                         {pos.icon}
                       </button>
@@ -181,7 +181,7 @@ const Upload = () => {
                     max="72"
                     value={fontSize}
                     onChange={(e) => setFontSize(e.target.value)}
-                    className="w-full accent-cyan-500"
+                    className="cursor-pointer w-full accent-cyan-500"
                   />
                 </div>
 
@@ -224,8 +224,8 @@ const Upload = () => {
 
           {/* Upload & Cancel Buttons */}
           <div className="mt-12 flex gap-8">
-            <button onClick={handleMemeUpload} className="w-1/2 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold rounded-lg hover:scale-105 transition-all">🚀 Upload Meme</button>
-            <button onClick={handleCancel} className="w-1/2 py-4 bg-gradient-to-r from-red-400 to-red-600 text-white font-bold rounded-lg hover:scale-105 transition-all"> ❌  Cancel</button>
+            <button onClick={handleMemeUpload} className="cursor-pointer w-1/2 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold rounded-lg hover:scale-105 transition-all">🚀 Upload Meme</button>
+            <button onClick={handleCancel} className="cursor-pointer w-1/2 py-4 bg-gradient-to-r from-red-400 to-red-600 text-white font-bold rounded-lg hover:scale-105 transition-all"> ❌  Cancel</button>
           </div>
         </div>
       </div>

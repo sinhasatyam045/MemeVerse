@@ -32,7 +32,14 @@ const saveState = (state) => {
 export const fetchMemes = createAsyncThunk("app/fetchMemes", async (_, { rejectWithValue }) => {
   try {
     const response = await axios.get("https://api.imgflip.com/get_memes");
-    return response.data.data.memes;
+    
+    // Add a default likes count of 0 to each meme for proper initialization
+    const memesWithLikes = response.data.data.memes.map(meme => ({
+      ...meme,
+      likes: 0  // This won't be used directly, but helps with TypeScript if used
+    }));
+    
+    return memesWithLikes;
   } catch (error) {
     console.error("Error fetching memes:", error);
     return rejectWithValue(error.message);
@@ -109,7 +116,9 @@ const initialState = (() => {
       user: {
         ...storedState.user,
         profilePhoto: profilePhoto
-      }
+      },
+      // Ensure interactions is properly initialized
+      interactions: storedState.interactions || {}
     };
   }
   
@@ -147,23 +156,18 @@ const appSlice = createSlice({
       document.documentElement.classList.toggle("dark", state.theme === "dark");
     },
     likeMeme: (state, action) => {
-      console.log("Entered liked reducer");
       const memeId = action.payload.memeId;
-      console.log(memeId);
-      console.log(state);
-    
+      
       // Initialize interactions for this meme if it doesn't exist
       if (!state.interactions[memeId]) {
-        console.log("State interactions:", state.interactions);
-        state.interactions[memeId] = { likes: 0, comments: [] };
+        state.interactions[memeId] = { likes: 0, dislikes: 0, comments: [] };
       }
-      console.log("State interactions:", state.interactions);
-      console.log("State.interactions[memeId]:", state.interactions[memeId]);
+      
+      // Increment likes
       state.interactions[memeId].likes += 1;
-    
+      
       // Find the liked meme
       const likedMeme = state.memes.find(meme => meme.id === memeId);
-      console.log("Liked Meme:", likedMeme);
       
       // Make sure state.likedMemes is an array before using .some()
       if (!Array.isArray(state.likedMemes)) {
@@ -173,17 +177,32 @@ const appSlice = createSlice({
       // Add the meme to likedMemes if it's not already there
       if (likedMeme && !state.likedMemes.some(meme => meme.id === memeId)) {
         state.likedMemes.push(likedMeme);
-        localStorage.setItem("likedMemes", JSON.stringify(state.likedMemes)); // Save to local storage
+        state.likedPosts += 1; // Increment likedPosts counter
+        
+        // Update localStorage
+        localStorage.setItem("likedMemes", JSON.stringify(state.likedMemes));
       }
     },
     dislikeMeme: (state, action) => {
       const { memeId } = action.payload;
-      state.interactions[memeId] = state.interactions[memeId] || { likes: 0, dislikes: 0, comments: [] };
-      state.interactions[memeId].dislikes -= 1;
+      
+      // Initialize interactions for this meme if it doesn't exist
+      if (!state.interactions[memeId]) {
+        state.interactions[memeId] = { likes: 0, dislikes: 0, comments: [] };
+      }
+      
+      // Increment dislikes
+      state.interactions[memeId].dislikes += 1;
     },
     addComment: (state, action) => {
       const { memeId, comment } = action.payload;
-      state.interactions[memeId] = state.interactions[memeId] || { likes: 0, dislikes: 0, comments: [] };
+      
+      // Initialize interactions for this meme if it doesn't exist
+      if (!state.interactions[memeId]) {
+        state.interactions[memeId] = { likes: 0, dislikes: 0, comments: [] };
+      }
+      
+      // Add comment
       state.interactions[memeId].comments.push(comment);
       state.totalComments += 1;
     },
@@ -197,7 +216,7 @@ const appSlice = createSlice({
     addMeme: (state, action) => {
       const newMeme = {
         ...action.payload,
-        id: Date.now(),
+        id: Date.now().toString(), // Ensure ID is a string to match API memes
         timestamp: new Date().toISOString(),
         // Add user information to the meme
         user: {
@@ -206,10 +225,16 @@ const appSlice = createSlice({
           profilePhoto: state.user.profilePhoto
         }
       };
-      console.log("New Meme:", newMeme);
       
       // Add to uploadedMemes array
       state.uploadedMemes.unshift(newMeme);
+      
+      // Also add to main memes array for consistent display
+      state.memes.unshift(newMeme);
+      
+      // Initialize interactions for this new meme
+      state.interactions[newMeme.id] = { likes: 0, dislikes: 0, comments: [] };
+      
       state.totalPosts += 1;
     },
     updateUser: (state, action) => {
@@ -246,6 +271,22 @@ const appSlice = createSlice({
     setLikedMemes: (state, action) => {
       state.likedMemes = action.payload;
     },
+    // New reducer to manually update likes for testing
+    updateMemeInteractions: (state, action) => {
+      const { memeId, likes, dislikes } = action.payload;
+      
+      if (!state.interactions[memeId]) {
+        state.interactions[memeId] = { likes: 0, dislikes: 0, comments: [] };
+      }
+      
+      if (likes !== undefined) {
+        state.interactions[memeId].likes = likes;
+      }
+      
+      if (dislikes !== undefined) {
+        state.interactions[memeId].dislikes = dislikes;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -256,6 +297,13 @@ const appSlice = createSlice({
       .addCase(fetchMemes.fulfilled, (state, action) => {
         state.loading = false;
         state.memes = action.payload;
+        
+        // Initialize interactions for all fetched memes
+        action.payload.forEach(meme => {
+          if (!state.interactions[meme.id]) {
+            state.interactions[meme.id] = { likes: 0, dislikes: 0, comments: [] };
+          }
+        });
       })
       .addCase(fetchMemes.rejected, (state, action) => {
         state.loading = false;
@@ -291,6 +339,7 @@ export const {
   saveMeme,
   removeSavedMeme,
   setLikedMemes,
+  updateMemeInteractions, // Export the new reducer
 } = appSlice.actions;
 
 const store = configureStore({
